@@ -70,11 +70,11 @@ services:
       - promdata:/prometheus
     configs:
       - source: prometheus_config
-        target: /etc/prometheus/prometheus.yml
+        target: /etc/prometheus/prometheus.yaml
       - source: prometheus_rules
         target: /etc/prometheus/alert.rules
     command:
-      - '--config.file=/etc/prometheus/prometheus.yml'
+      - '--config.file=/etc/prometheus/prometheus.yaml'
       - '--storage.tsdb.path=/prometheus'
       - '--web.console.libraries=/etc/prometheus/console_libraries'
       - '--web.console.templates=/etc/prometheus/consoles'
@@ -122,6 +122,6 @@ configs:
   alertmanager_config:
     file: ../alertmanager/configs/alertmanager.yml
   prometheus_config:
-    file: ../prometheus/configs/prometheus.yml
+    file: ../prometheus/configs/prometheus.yaml
   prometheus_rules:
     file: ../prometheus/rules/alert.rules

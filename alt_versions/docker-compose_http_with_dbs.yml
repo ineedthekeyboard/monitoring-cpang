@@ -103,11 +103,11 @@ services:
       - promdata:/prometheus
     configs:
       - source: prometheus_config
-        target: /etc/prometheus/prometheus.yml
+        target: /etc/prometheus/prometheus.yaml
       - source: prometheus_rules
         target: /etc/prometheus/alert.rules
     command:
-      - '--config.file=/etc/prometheus/prometheus.yml'
+      - '--config.file=/etc/prometheus/prometheus.yaml'
       - '--storage.tsdb.path=/prometheus'
       - '--web.console.libraries=/etc/prometheus/console_libraries'
       - '--web.console.templates=/etc/prometheus/consoles'
@@ -137,7 +137,7 @@ services:
       - grafana_provisioning:/etc/grafana/provisioning
     configs:
       - source: grafana_config_datasource
-        target: /etc/grafana/provisioning/datasources/prometheus.yml
+        target: /etc/grafana/provisioning/datasources/prometheus.yaml
       - source: grafana_dashboard_prometheus
         target: /etc/grafana/provisioning/dashboards/ds_prometheus.yml
       - source: grafana_dashboard_docker
@@ -229,7 +229,7 @@ configs:
   prometheus_rules:
     file: ../prometheus/rules/alert.rules
   grafana_config_datasource:
-    file: ../grafana/provisioning/datasources/prometheus.yml
+    file: ../grafana/provisioning/datasources/prometheus.yaml
   grafana_dashboard_prometheus:
     file: ../grafana/provisioning/dashboards/ds_prometheus.yml
   grafana_dashboard_docker:

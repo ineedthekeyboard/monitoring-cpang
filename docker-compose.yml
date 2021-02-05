@@ -16,6 +16,11 @@ services:
       resources:
         limits:
           memory: 128M
+      labels:
+        - traefik.enable=true
+        - traefik.http.routers.cadvisor.rule=PathPrefix(`/cadvisor`)
+        - traefik.http.services.cadvisor.loadbalancer.server.port=8080
+        - traefik.docker.network=public
 
   node-exporter:
     image: ruanbekker/node-exporter:v0.18.0
@@ -42,6 +47,9 @@ services:
       resources:
         limits:
           memory: 128M
+#      labels:
+#        - traefik.enable=true
+#        - traefik.http.services.alertmanager.loadbalancer.server.port=9100
 
   blackbox-exporter:
     image: prom/blackbox-exporter:v0.12.0
@@ -78,16 +86,11 @@ services:
         limits:
           memory: 100M
       labels:
-        - traefik.frontend.rule=Host:alertmanager.${DOMAIN:-localhost}
-        - traefik.frontend.auth.basic.usersFile=/etc/htpasswd
         - traefik.enable=true
-        - traefik.port=9093
-        - traefik.tags=public
-        - traefik.backend=alertmanager
+        - traefik.http.routers.alertmanager.rule=PathPrefix(`/alertmanager`)
+        - traefik.http.services.alertmanager.loadbalancer.server.port=9093
         - traefik.docker.network=public
-        - traefik.redirectorservice.frontend.entryPoints=http
-        - traefik.redirectorservice.frontend.redirect.entryPoint=https
-        - traefik.webservice.frontend.entryPoints=https
+        - traefik.frontend.auth.basic.usersFile=/etc/htpasswd
 
   prometheus:
     image: prom/prometheus:v2.9.2
@@ -97,11 +100,11 @@ services:
       - promdata:/prometheus
     configs:
       - source: prometheus_config
-        target: /etc/prometheus/prometheus.yml
+        target: /etc/prometheus/prometheus.yaml
       - source: prometheus_rules
         target: /etc/prometheus/alert.rules
     command:
-      - '--config.file=/etc/prometheus/prometheus.yml'
+      - '--config.file=/etc/prometheus/prometheus.yaml'
       - '--storage.tsdb.path=/prometheus'
       - '--web.console.libraries=/etc/prometheus/console_libraries'
       - '--web.console.templates=/etc/prometheus/consoles'
@@ -116,15 +119,11 @@ services:
         limits:
           memory: 500M
       labels:
-        - traefik.frontend.rule=Host:prometheus.${DOMAIN:-localhost}
         - traefik.enable=true
-        - traefik.port=9090
-        - traefik.tags=public
-        - traefik.backend=prometheus
+#        - traefik.http.routers.prometheus.rule=PathPrefix(`/prom`)
+        - "traefik.http.routers.prometheus.rule=Host(`prometheus.${DOMAIN:-localhost}`)"
         - traefik.docker.network=public
-        - traefik.redirectorservice.frontend.entryPoints=http
-        - traefik.redirectorservice.frontend.redirect.entryPoint=https
-        - traefik.webservice.frontend.entryPoints=https
+        - traefik.http.services.prometheus.loadbalancer.server.port=9090
 
   pushgateway:
     image: prom/pushgateway:v0.8.0
@@ -143,16 +142,11 @@ services:
         limits:
           memory: 64M
       labels:
-        - traefik.frontend.rule=Host:pushgateway.${DOMAIN:-localhost}
-        - traefik.frontend.auth.basic.usersFile=/etc/htpasswd
         - traefik.enable=true
-        - traefik.port=9091
-        - traefik.tags=public
-        - traefik.backend=pushgateway
+        - traefik.http.routers.pushgateway.rule=PathPrefix(`/pushgateway`)
+        - traefik.http.services.pushgateway.loadbalancer.server.port=9091
         - traefik.docker.network=public
-        - traefik.redirectorservice.frontend.entryPoints=http
-        - traefik.redirectorservice.frontend.redirect.entryPoint=https
-        - traefik.webservice.frontend.entryPoints=https
+        - traefik.frontend.auth.basic.usersFile=/etc/htpasswd
 
   grafana:
     image: grafana/grafana:6.2.1
@@ -177,15 +171,11 @@ services:
         limits:
           memory: 384M
       labels:
-        - traefik.frontend.rule=Host:grafana.${DOMAIN:-localhost}
         - traefik.enable=true
-        - traefik.port=3000
-        - traefik.tags=public
-        - traefik.backend=grafana
+#        - traefik.http.routers.grafana.rule=PathPrefix(`/grafana`)
         - traefik.docker.network=public
-        - traefik.redirectorservice.frontend.entryPoints=http
-        - traefik.redirectorservice.frontend.redirect.entryPoint=https
-        - traefik.webservice.frontend.entryPoints=https
+        - "traefik.http.routers.grafana.rule=Host(`grafana.${DOMAIN:-localhost}`)"
+        - traefik.http.services.grafana.loadbalancer.server.port=3000
 
 networks:
   private:
@@ -205,7 +195,7 @@ configs:
   alertmanager_config:
     file: ./alertmanager/configs/alertmanager.yml
   prometheus_config:
-    file: ./prometheus/configs/prometheus.yml
+    file: ./prometheus/configs/prometheus.yaml
   prometheus_rules:
     file: ./prometheus/rules/alert.rules
   basicauth_htpasswd:
